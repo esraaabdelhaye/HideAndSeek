@@ -1,0 +1,15 @@
+<div class="flex flex-col">
+
+    @for (item of gameState(); track $index) {
+        <div class="flex">
+            @for (p of item; track $index) {
+                <div class="w-12 h-12 border border-gray-400 flex items-center justify-center" [class.bg-gray-400]="p.difficulty == 1" [class.bg-green-500]="p.difficulty == 2" [class.bg-red-500]="p.difficulty == 3">
+                    {{ p.hider_strategy.toFixed(2) }}
+                </div>
+            }
+        </div>
+        
+    }
+</div>
+
+<button (click)="debug()">Debug hider</button>

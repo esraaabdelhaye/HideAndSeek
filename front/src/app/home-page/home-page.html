@@ -1,0 +1,49 @@
+<div class="bg-slate-300 h-screen flex flex-col">
+    @if (!mode()) {
+
+    <div class="flex p-[10%] pt-[6%]  gap-4">
+        <div class="flex flex-1">
+            <button (click)="mode.set('simulation')"
+                class="h-full w-full cursor-pointer rounded-[10px] bg-blue-600 px-4 py-4 text-base font-semibold text-white transition duration-150 ease-in-out hover:-translate-y-px hover:opacity-95"
+                type="button">
+                Simulation Mode
+            </button>
+        </div>
+        <div class="flex flex-1 flex-col gap-3">
+            <button (click)="mode.set('hider')"
+                class="flex-1 w-full cursor-pointer rounded-[10px] bg-emerald-600 px-4 py-4 text-base font-semibold text-white transition duration-150 ease-in-out hover:-translate-y-px hover:opacity-95"
+                type="button">
+                Play as Hider
+            </button>
+            <button (click)="mode.set('seeker')"
+                class="flex-1 w-full cursor-pointer rounded-[10px] bg-red-600 px-4 py-4 text-base font-semibold text-white transition duration-150 ease-in-out hover:-translate-y-px hover:opacity-95"
+                type="button">
+                Play as Seeker
+            </button>
+        </div>
+    </div>
+    <div class="mx-auto bg-white rounded-[10px] p-6 font-semibold w-[50%] flex flex-col items-center justify-center gap-6">
+
+
+            <div class="flex flex-row items-center gap-3 w-fit">
+                <p class="text-gray-600 text-sm">World length:</p>
+                <input
+                 type="number" placeholder="Enter world length" class="w-fit bg-sky-300 rounded-[10px] px-4 py-2 text-base font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500" 
+                 (change)="worldLength.set($event.target.valueAsNumber)" [value]="worldLength()"
+                />
+            </div>
+            <div class="flex flex-row items-center gap-3 w-fit">
+                <p class="text-gray-600 text-sm">World width:</p>
+                <input type="number" placeholder="Enter world width" class="w-fit bg-sky-300 rounded-[10px] px-4 py-2 text-base font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500" 
+                (change)="worldWidth.set($event.target.valueAsNumber)" [value]="worldWidth()"
+                />
+            </div>
+        
+    </div>
+    }@else if (mode() == 'hider') {
+        <app-hider [worldLength]="worldLength()" [worldWidth]="worldWidth()"></app-hider>
+    }@else if (mode() == 'seeker') {
+        <!-- <app-seeker></app-seeker> -->
+    }
+    <button (click)="debug()">Debug</button>
+</div>
