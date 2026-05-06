@@ -30,6 +30,8 @@ class PlayRoundResponse(BaseModel):
     points: float
     human_score: float
     computer_score: float
+    human_round_score: float
+    computer_round_score: float
     human_rounds_won: int
     computer_rounds_won: int
 
