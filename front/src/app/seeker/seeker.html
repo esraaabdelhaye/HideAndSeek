@@ -138,8 +138,8 @@
 									class="peer sr-only" />
 								<label [for]="'cell-' + rowIndex + '-' + colIndex" (click)="choose(p)" 
 									class="flex h-16 w-16 cursor-pointer select-none items-center justify-center rounded-xl border border-slate-700 text-center text-sm font-semibold text-slate-900 shadow-lg shadow-black/20 transition duration-200 hover:-translate-y-0.5 hover:scale-[1.02] hover:ring-2 hover:ring-purple-400/70 peer-checked:ring-4 peer-checked:ring-purple-400 peer-checked:ring-offset-2 peer-checked:ring-offset-slate-950"
-									[class.bg-gray-400]="p.difficulty == 2" [class.bg-red-500]="p.difficulty == 1"
-									[class.bg-green-500]="p.difficulty == 3"
+									[class.bg-gray-400]="p.difficulty == 2" [class.bg-red-500]="p.difficulty == 3"
+									[class.bg-green-500]="p.difficulty == 1"
 									[class.collision]="animatedCell()?.row === rowIndex && animatedCell()?.col === colIndex && animatedCell()?.type === 'collision'"
 									[class.miss]="animatedCell()?.row === rowIndex && animatedCell()?.col === colIndex && animatedCell()?.type === 'miss'">
 									<span class="flex flex-col w-20 h-20 justify-center items-center leading-none">
