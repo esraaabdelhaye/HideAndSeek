@@ -6,7 +6,7 @@ class CellType(Enum):
     EASY = 1
 
 SCORING_RULES = {
-    CellType.EASY:    {"win": 10, "lose": -5},
-    CellType.NEUTRAL: {"win": 15, "lose": -10},
-    CellType.HARD:    {"win": 20, "lose": -15}
+    CellType.EASY:    {"win": 2, "lose": -1},
+    CellType.NEUTRAL: {"win": 1, "lose": -1},
+    CellType.HARD:    {"win": 1, "lose": -3}
 }
