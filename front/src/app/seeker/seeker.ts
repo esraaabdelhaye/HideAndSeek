@@ -2,12 +2,12 @@ import { Component, computed, inject, Input, OnInit, signal } from '@angular/cor
 import { HideAndSeekResponse, Http } from '../services/http';
 
 @Component({
-  selector: 'app-hider',
+  selector: 'app-seeker',
   imports: [],
-  templateUrl: './hider.html',
-  styleUrl: './hider.css',
+  templateUrl: './seeker.html',
+  styleUrl: './seeker.css',
 })
-export class Hider implements OnInit {
+export class Seeker implements OnInit {
   @Input() worldLength!: number;
   @Input() worldWidth!: number;
   http = inject(Http);
@@ -15,37 +15,37 @@ export class Hider implements OnInit {
 
   ngOnInit(): void {
     this.play();
-
-    
   }
+  
   play = () => {
     this.http.generateWorld(this.worldLength, this.worldWidth).subscribe({
       next: (response) => {
         console.log(response);
-        this.reponse.set(response);
+        this.response.set(response);
       },
       error: (error) => {
         console.error(error);
       }
     });
   }
-  reponse =signal<HideAndSeekResponse | null> (null);
+  
+  response = signal<HideAndSeekResponse | null>(null);
+  
   gameState = computed(() => {
-    if (!this.reponse()) return null;
+    if (!this.response()) return null;
     const state: GameState = [];
     let c = 0
-    for (let i = 0; i < this.reponse()!.grid.length; i++) {
+    for (let i = 0; i < this.response()!.grid.length; i++) {
       const row: choice[] = [];
-      for (let j = 0; j < this.reponse()!.grid[i].length; j++) {
-        const payoffVal = this.reponse()!.payoff_matrix?.[i]?.[j] ?? this.reponse()!.payoff_matrix?.flat()[c] ?? 0;
+      for (let j = 0; j < this.response()!.grid[i].length; j++) {
         row.push({
-          difficulty: this.reponse()!.grid[i][j],
-          hider_strategy: this.reponse()!.hider_strategies[c],
-          seeker_strategy: this.reponse()!.seeker_strategies[c],
+          difficulty: this.response()!.grid[i][j],
+          hider_strategy: this.response()!.hider_strategies[c],
+          seeker_strategy: this.response()!.seeker_strategies[c],
           row: i,
           col: j,
-          payoff_if_hider_wins: payoffVal,
-          payoff_if_seeker_wins: -payoffVal
+          payoff_if_hider_wins: this.response()!.payoff_matrix?.[i]?.[j] ?? this.response()!.payoff_matrix?.flat()[c] ?? 0,
+          payoff_if_seeker_wins: -(this.response()!.payoff_matrix?.[i]?.[j] ?? this.response()!.payoff_matrix?.flat()[c] ?? 0)
         });
         c++;
       }
@@ -54,54 +54,51 @@ export class Hider implements OnInit {
     
     return state;
   });
+  
   debug = () => {
     console.log(this.gameState());
-    console.log(this.reponse());
-    
+    console.log(this.response());
   }
 
   choose(choice: choice) {
     console.log(`Chosen cell: (${choice.row}, ${choice.col}) with difficulty ${choice.difficulty}`);
-    // Here you can implement the logic to handle the chosen cell, e.g., send it to the backend or update the UI
-    let c = []
-    for(let i=0; i< this.worldLength * this.worldWidth; i++) {
-      c.push(i)
-    }
-    const selectedCell = weightedRandom(this.gameState()?.flatMap((row) => row) || [], this.reponse()!.hider_strategies)
+    const selectedCell = weightedRandom(this.gameState()?.flatMap((row) => row) || [], this.response()!.hider_strategies)
     if (selectedCell !== undefined) {
-      console.log(`Selected cell: (${selectedCell.row}, ${selectedCell.col})`);
+      console.log(`Selected cell (hider location): (${selectedCell.row}, ${selectedCell.col})`);
       this.algorithmSelectedCell.set({ row: selectedCell.row, col: selectedCell.col });
       const isSame = selectedCell.row === choice.row && selectedCell.col === choice.col;
       if (isSame) {
-        console.log("Chosen cell was selected by the algorithm!");
+        console.log("Chosen cell was where hider is!");
         this.animatedCell.set({ row: choice.row, col: choice.col, type: 'collision' });
         this.handleCollision(choice);
       } else {
-        console.log("Chosen cell was NOT selected by the algorithm.");
+        console.log("Chosen cell was NOT where hider is.");
         this.animatedCell.set({ row: choice.row, col: choice.col, type: 'miss' });
         this.handleMiss(choice);
       }
       setTimeout(() => this.animatedCell.set(null), 700);
     }
   }
+  
   handleCollision(choice: choice) {
     const difficulty = choice.difficulty;
-    if(difficulty == 1) {
-      this.accumulator.update(score => score + scores["EASY"].lose);
-    } else if (difficulty == 2) {
-      this.accumulator.update(score => score + scores["NEUTRAL"].lose);
-    } else if (difficulty == 3) {
-      this.accumulator.update(score => score + scores["HARD"].lose);
-    }
-  }
-  handleMiss(choice: choice) {
-    const difficulty = choice.difficulty;
-    if(difficulty == 1) {
+    if(difficulty == 3) {
       this.accumulator.update(score => score + scores["EASY"].win);
     } else if (difficulty == 2) {
       this.accumulator.update(score => score + scores["NEUTRAL"].win);
-    } else if (difficulty == 3) {
+    } else if (difficulty == 1) {
       this.accumulator.update(score => score + scores["HARD"].win);
+    }
+  }
+  
+  handleMiss(choice: choice) {
+    const difficulty = choice.difficulty;
+    if(difficulty == 3) {
+      this.accumulator.update(score => score + scores["EASY"].lose);
+    } else if (difficulty == 2) {
+      this.accumulator.update(score => score + scores["NEUTRAL"].lose);
+    } else if (difficulty == 1) {
+      this.accumulator.update(score => score + scores["HARD"].lose);
     }
   }
 
@@ -110,16 +107,6 @@ export class Hider implements OnInit {
   algorithmSelectedCell = signal<{ row: number; col: number } | null>(null);
 }
 
-/* 
-export interface HideAndSeekResponse {
-  grid: number[][];
-  payoff_matrix: number[][];
-  hider_strategies: number[];
-  seeker_strategies: number[];
-  expected_value: number;
-}
-
-*/
 export interface choice {
   difficulty: number;
   hider_strategy: number;
@@ -129,32 +116,26 @@ export interface choice {
   payoff_if_hider_wins: number;
   payoff_if_seeker_wins: number;
 }
+
 type GameState = choice[][]
 
 function weightedRandom(items: choice[], weights: number[]): any {
-  // 1. Calculate the total sum of all weights
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-  
-  // 2. Generate a random number between 0 and totalWeight
   const randomNum = Math.random() * totalWeight;
   
-  // 3. Iterate through items, subtracting weights from the random number
   let currentWeight = 0;
   for (let i = 0; i < weights.length; i++) {
     currentWeight += weights[i];
-    // If the random number is less than the accumulated weight, select this item
     if (randomNum < currentWeight) {
       return items[i];
     }
   }
   
-  // Fallback (should theoretically not be reached if weights are correct)
   return items[items.length - 1];
 }
 
-
 const scores: Record<string, { win: number; lose: number }> = {
-    "EASY":    {"win": 10, "lose": -5},
-    "NEUTRAL": {"win": 15, "lose": -10},
-    "HARD":    {"win": 20, "lose": -15}
+    "EASY":    {"win": 15, "lose": -10},
+    "NEUTRAL": {"win": 10, "lose": -15},
+    "HARD":    {"win": 5, "lose": -20}
 }

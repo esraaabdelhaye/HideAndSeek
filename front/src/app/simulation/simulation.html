@@ -1,0 +1,80 @@
+<div class="simulation-shell">
+	<header class="hero-card flex flex-row justify-between">
+		<div>
+			<p class="eyebrow">Simulation Mode</p>
+			<h1>Run 100 rounds and compare outcomes</h1>
+			<p class="hero-copy">Generate worlds repeatedly, simulate both players, and inspect the result distribution in one place.</p>
+		</div>
+
+		<div class="hero-stats">
+			<div class="stat-pill">
+				<span>Rounds</span>
+				<strong>{{ rounds() }}</strong>
+			</div>
+		</div>
+	</header>
+
+	<main class="simulation-grid">
+		<section class="panel-card controls-card">
+			<div class="panel-header">
+				<div>
+					<p class="panel-kicker">Controls</p>
+					<h2>Simulation settings</h2>
+				</div>
+				<button class="run-button" type="button" (click)="simulate()" [disabled]="running()">
+					{{ running() ? 'Running...' : 'Run simulation' }}
+				</button>
+			</div>
+
+			<div class="control-grid">
+				<label class="control-field">
+					<span>Rounds</span>
+					<input type="number" class="text-l" [value]="rounds()" (input)="rounds.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" />
+				</label>
+
+				<label class="control-field">
+					<span>World length</span>
+					<input type="number" [value]="worldLength()" (input)="worldLength.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" />
+				</label>
+
+				<label class="control-field">
+					<span>World width</span>
+					<input type="number" [value]="worldWidth()" (input)="worldWidth.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" />
+				</label>
+			</div>
+		</section>
+
+		<section class="panel-card results-card">
+			<div class="panel-header">
+				<div>
+					<p class="panel-kicker">Outcome</p>
+					<h2>Round summary</h2>
+				</div>
+				<span class="status-chip">{{ summary().total }} simulated decisions</span>
+			</div>
+
+			<div class="metrics-grid">
+				<div class="metric-box metric-cyan">
+					<span>Hider wins</span>
+					<strong>{{ results().hiderWins }}</strong>
+					<small>Losses: {{ results().hiderLosses }}</small>
+				</div>
+				<div class="metric-box metric-purple">
+					<span>Seeker wins</span>
+					<strong>{{ results().seekerWins }}</strong>
+					<small>Losses: {{ results().seekerLosses }}</small>
+				</div>
+			</div>
+
+			<div class="json-card">
+				<div class="json-header">
+					<span>Results payload</span>
+					<code>results()</code>
+				</div>
+				<pre class="results-pre" [innerText]="resultsText()"></pre>
+			</div>
+		</section>
+
+	
+	</main>
+</div>

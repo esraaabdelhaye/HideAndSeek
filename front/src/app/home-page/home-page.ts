@@ -1,11 +1,13 @@
 import { Component, signal } from '@angular/core';
 import { Hider } from "../hider/hider";
+import { Seeker } from "../seeker/seeker";
+import { Simulation } from "../simulation/simulation";
 
 type mode = 'simulation' | 'hider' | 'seeker' | null;
 
 @Component({
   selector: 'app-home-page',
-  imports: [Hider],
+  imports: [Hider, Seeker, Simulation],
   templateUrl: './home-page.html',
   styleUrl: './home-page.css',
 })

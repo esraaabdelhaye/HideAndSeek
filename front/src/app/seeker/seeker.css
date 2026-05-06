@@ -1,0 +1,27 @@
+:root {
+	--bg: #0f1724;
+	--panel: #0b1220;
+	--muted: #94a3b8;
+	--tile-size: 64px;
+	--tile-gap: 8px;
+	--primary: #06b6d4; /* unify color */
+	--success: #10b981;
+	--danger: #ef4444;
+}
+
+:host { display:block; color:#e6eef6; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+
+label[for^="cell-"] { width: var(--tile-size); height: var(--tile-size); display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:6px; border-radius:10px; transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease; }
+label[for^="cell-"]:hover { transform: translateY(-4px) scale(1.02); box-shadow: 0 8px 24px rgba(2,6,23,0.6); }
+
+label.collision { animation: collision-pulse 700ms ease-out !important; box-shadow: 0 0 12px rgba(16,185,129,0.85) !important; }
+label.miss { animation: miss-shake 700ms ease-out, miss-flash 700ms linear !important; box-shadow: 0 0 10px rgba(239,68,68,0.6) !important; }
+
+@keyframes collision-pulse { 0%{transform:scale(1)}40%{transform:scale(1.12)}70%{transform:scale(0.98)}100%{transform:scale(1)} }
+@keyframes miss-shake { 0%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}100%{transform:translateX(0)} }
+@keyframes miss-flash { 0%{opacity:1}50%{opacity:0.6}100%{opacity:1} }
+
+.rounded-2xl ul { padding-left:0; }
+.rounded-2xl ul li { display:flex; align-items:center; gap:8px; }
+button { border-radius:12px; padding:10px 12px; font-weight:600; }
+

@@ -43,7 +43,8 @@
     }@else if (mode() == 'hider') {
         <app-hider [worldLength]="worldLength()" [worldWidth]="worldWidth()"></app-hider>
     }@else if (mode() == 'seeker') {
-        <!-- <app-seeker></app-seeker> -->
+        <app-seeker [worldLength]="worldLength()" [worldWidth]="worldWidth()" ></app-seeker>
+    }@else {
+        <app-simulation ></app-simulation>
     }
-    <button (click)="debug()">Debug</button>
 </div>
