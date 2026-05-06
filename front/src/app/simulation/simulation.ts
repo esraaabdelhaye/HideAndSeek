@@ -1,6 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { NewGameResponse, Http } from '../services/http';
-import { lastValueFrom } from 'rxjs';
+import { NewGameResponse, Http, RoundSnapshot, SimulationResponse } from '../services/http';
 
 @Component({
   selector: 'app-simulation',
@@ -10,7 +9,7 @@ import { lastValueFrom } from 'rxjs';
 export class Simulation {
   http = inject(Http);
 
-  rounds = signal(100);
+  private readonly ROUNDS = 100;
   worldLength = signal(3);
   worldWidth = signal(3);
 
@@ -19,15 +18,15 @@ export class Simulation {
 
   results = signal({
     hiderWins: 0,
-    hiderLosses: 0,
     seekerWins: 0,
-    seekerLosses: 0
+    hiderScore: 0,
+    seekerScore: 0
   });
 
   resultsText = computed(() => JSON.stringify(this.results(), null, 2));
   summary = computed(() => {
     const current = this.results();
-    const total = current.hiderWins + current.hiderLosses + current.seekerWins + current.seekerLosses;
+    const total = current.hiderWins + current.seekerWins;
     const hiderWinRate = total ? Math.round((current.hiderWins / total) * 100) : 0;
     const seekerWinRate = total ? Math.round((current.seekerWins / total) * 100) : 0;
 
@@ -42,41 +41,60 @@ export class Simulation {
     if (this.running()) return;
     this.running.set(true);
     this.logs.set([]);
-    this.results.set({ hiderWins: 0, hiderLosses: 0, seekerWins: 0, seekerLosses: 0 });
-
-    /* const rounds = this.rounds();
-    for (let r = 0; r < rounds; r++) {
-      try {
-        const response = await lastValueFrom(this.http.generateWorld(this.worldLength(), this.worldWidth()));
-        this.runOne(response);
-      } catch (err) {
-        this.pushLog(`Round ${r + 1}: error fetching world: ${err}`);
+    this.results.set({ hiderWins: 0, seekerWins: 0,  hiderScore: 0, seekerScore: 0 });
+    
+    this.http.generateWorld(this.worldLength(), this.worldWidth(), 'hider').subscribe({
+      next: (response) => {
+        this.http.simulate((response as any)?.session_id ?? '').subscribe({
+          next: (simulationResponse) => {
+            console.log(simulationResponse);
+            
+            for (let r = 0; r < this.ROUNDS; r++) {
+              const snapshot = (simulationResponse as any)?.snapshots[r] ?? {
+                round: r + 1,
+                hider_row: -1,
+                hider_col: -1,
+                seeker_row: -1,
+                seeker_col: -1,
+                winner: 'hider',
+                points: 0
+              };
+              this.runOne(snapshot);
+            }
+            this.pushLog(`Simulation finished: ${this.ROUNDS} rounds`);
+            this.pushLog(JSON.stringify(this.results(), null, 2));
+            this.running.set(false);
+            this.results.update(r => ({ ...r , hiderScore: simulationResponse.hider_score, seekerScore: simulationResponse.seeker_score }));
+          },
+          error: (error) => {
+            console.error('Simulation error:', error);
+            this.running.set(false);
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Generate world error:', error);
+        this.running.set(false);
       }
-    } */
-
-    this.pushLog(`Simulation finished: ${this.rounds} rounds`);
-    this.pushLog(JSON.stringify(this.results(), null, 2));
-    console.log('Simulation results', this.results());
-    this.running.set(false);
+    });
   }
 
-  runOne(response: NewGameResponse) {
-    const items = this.flattenGrid(response);
-    const hiderChoice = weightedRandom(items, response.hider_strategies);
-    const seekerChoice = weightedRandom(items, response.seeker_strategies);
-
-    if (!hiderChoice || !seekerChoice) {
-      this.pushLog('Invalid choices in a round');
-      return;
-    }
-
-    const found = hiderChoice.row === seekerChoice.row && hiderChoice.col === seekerChoice.col;
+  runOne(snap: RoundSnapshot) {
+    const found = snap.winner === 'seeker';
+    const points = snap.points || 0;
+    
     if (found) {
-      // seeker found hider => seeker wins
-      this.results.update(r => ({ ...r, seekerWins: r.seekerWins + 1, hiderLosses: r.hiderLosses + 1 }));
+      this.results.update(r => ({
+        ...r,
+        seekerWins: r.seekerWins + 1,
+        seekerScore: r.seekerScore + points
+      }));
     } else {
-      // hider escaped => hider wins
-      this.results.update(r => ({ ...r, hiderWins: r.hiderWins + 1, seekerLosses: r.seekerLosses + 1 }));
+      this.results.update(r => ({
+        ...r,
+        hiderWins: r.hiderWins + 1,
+        hiderScore: r.hiderScore + points
+      }));
     }
   }
 
@@ -113,16 +131,4 @@ export interface choice {
   col: number;
   payoff_if_hider_wins: number;
   payoff_if_seeker_wins: number;
-}
-
-function weightedRandom(items: choice[], weights: number[]): any {
-  if (!items || items.length === 0) return undefined;
-  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-  const randomNum = Math.random() * totalWeight;
-  let currentWeight = 0;
-  for (let i = 0; i < weights.length; i++) {
-    currentWeight += weights[i];
-    if (randomNum < currentWeight) return items[i];
-  }
-  return items[items.length - 1];
 }

@@ -93,7 +93,7 @@ export class Seeker implements OnInit {
   handleCollision(res: PlayRoundResponse) {
     this.humanScore.set(res.human_score);
     this.computerScore.set(res.computer_score);
-    this.roundGain.set(res.points);
+    this.roundGain.set(res.human_round_score);
     this.roundsWon.set(res.human_rounds_won);
     this.roundsLost.set(res.computer_rounds_won);
   }
@@ -101,7 +101,7 @@ export class Seeker implements OnInit {
   handleMiss(res: PlayRoundResponse) {
     this.humanScore.set(res.human_score);
     this.computerScore.set(res.computer_score);
-    this.roundGain.set(res.points);
+    this.roundGain.set(res.human_round_score);
     this.roundsWon.set(res.human_rounds_won);
     this.roundsLost.set(res.computer_rounds_won);
   }

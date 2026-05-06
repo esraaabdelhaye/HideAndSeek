@@ -1,16 +1,9 @@
 <div class="simulation-shell">
-	<header class="hero-card flex flex-row justify-between">
+	<header class="hero-card">
 		<div>
 			<p class="eyebrow">Simulation Mode</p>
 			<h1>Run 100 rounds and compare outcomes</h1>
 			<p class="hero-copy">Generate worlds repeatedly, simulate both players, and inspect the result distribution in one place.</p>
-		</div>
-
-		<div class="hero-stats">
-			<div class="stat-pill">
-				<span>Rounds</span>
-				<strong>{{ rounds() }}</strong>
-			</div>
 		</div>
 	</header>
 
@@ -28,18 +21,13 @@
 
 			<div class="control-grid">
 				<label class="control-field">
-					<span>Rounds</span>
-					<input type="number" class="text-l" [value]="rounds()" (input)="rounds.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" />
-				</label>
-
-				<label class="control-field">
 					<span>World length</span>
-					<input type="number" [value]="worldLength()" (input)="worldLength.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" />
+					<input type="number" class=" text-2xl" [value]="worldLength()" (input)="worldLength.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" max="10" />
 				</label>
 
 				<label class="control-field">
 					<span>World width</span>
-					<input type="number" [value]="worldWidth()" (input)="worldWidth.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" />
+					<input type="number" class=" text-2xl" [value]="worldWidth()" (input)="worldWidth.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" max="10" />
 				</label>
 			</div>
 		</section>
@@ -57,12 +45,21 @@
 				<div class="metric-box metric-cyan">
 					<span>Hider wins</span>
 					<strong>{{ results().hiderWins }}</strong>
-					<small>Losses: {{ results().hiderLosses }}</small>
 				</div>
 				<div class="metric-box metric-purple">
 					<span>Seeker wins</span>
 					<strong>{{ results().seekerWins }}</strong>
-					<small>Losses: {{ results().seekerLosses }}</small>
+				</div>
+			</div>
+
+			<div class="metrics-grid" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+				<div class="metric-box metric-cyan">
+					<span>Hider total score</span>
+					<strong>{{ results().hiderScore }}</strong>
+				</div>
+				<div class="metric-box metric-purple">
+					<span>Seeker total score</span>
+					<strong>{{ results().seekerScore }}</strong>
 				</div>
 			</div>
 

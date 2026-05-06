@@ -134,7 +134,7 @@
 
 .control-field {
 	display: grid;
-	gap: 8px;
+	gap: 4px;
 	padding: 14px;
 	border-radius: 18px;
 	background: rgba(15, 23, 42, 0.72);
@@ -149,7 +149,7 @@
 	border-radius: 12px;
 	padding: 10px 12px;
 	outline: none;
-	font-size: 0.95rem;
+	font-size: 3rem;
 }
 
 .control-field input:focus {
