@@ -1,5 +1,5 @@
 import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
-import { HideAndSeekResponse, Http } from '../services/http';
+import { NewGameResponse, Http } from '../services/http';
 
 @Component({
   selector: 'app-seeker',
@@ -18,7 +18,7 @@ export class Seeker implements OnInit {
   }
   
   play = () => {
-    this.http.generateWorld(this.worldLength, this.worldWidth).subscribe({
+    this.http.generateWorld(this.worldLength, this.worldWidth, 'seeker').subscribe({
       next: (response) => {
         console.log(response);
         this.response.set(response);
@@ -29,7 +29,7 @@ export class Seeker implements OnInit {
     });
   }
   
-  response = signal<HideAndSeekResponse | null>(null);
+  response = signal<NewGameResponse | null>(null);
   
   gameState = computed(() => {
     if (!this.response()) return null;

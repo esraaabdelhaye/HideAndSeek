@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { HideAndSeekResponse, Http } from '../services/http';
+import { NewGameResponse, Http } from '../services/http';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -44,7 +44,7 @@ export class Simulation {
     this.logs.set([]);
     this.results.set({ hiderWins: 0, hiderLosses: 0, seekerWins: 0, seekerLosses: 0 });
 
-    const rounds = this.rounds();
+    /* const rounds = this.rounds();
     for (let r = 0; r < rounds; r++) {
       try {
         const response = await lastValueFrom(this.http.generateWorld(this.worldLength(), this.worldWidth()));
@@ -52,15 +52,15 @@ export class Simulation {
       } catch (err) {
         this.pushLog(`Round ${r + 1}: error fetching world: ${err}`);
       }
-    }
+    } */
 
-    this.pushLog(`Simulation finished: ${rounds} rounds`);
+    this.pushLog(`Simulation finished: ${this.rounds} rounds`);
     this.pushLog(JSON.stringify(this.results(), null, 2));
     console.log('Simulation results', this.results());
     this.running.set(false);
   }
 
-  runOne(response: HideAndSeekResponse) {
+  runOne(response: NewGameResponse) {
     const items = this.flattenGrid(response);
     const hiderChoice = weightedRandom(items, response.hider_strategies);
     const seekerChoice = weightedRandom(items, response.seeker_strategies);
@@ -80,7 +80,7 @@ export class Simulation {
     }
   }
 
-  flattenGrid(response: HideAndSeekResponse) {
+  flattenGrid(response: NewGameResponse) {
     const items: choice[] = [];
     let c = 0;
     for (let i = 0; i < response.grid.length; i++) {

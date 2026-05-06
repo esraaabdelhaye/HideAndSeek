@@ -1,5 +1,5 @@
 import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
-import { HideAndSeekResponse, Http } from '../services/http';
+import { NewGameResponse, Http } from '../services/http';
 
 @Component({
   selector: 'app-hider',
@@ -15,11 +15,9 @@ export class Hider implements OnInit {
 
   ngOnInit(): void {
     this.play();
-
-    
   }
   play = () => {
-    this.http.generateWorld(this.worldLength, this.worldWidth).subscribe({
+    this.http.generateWorld(this.worldLength, this.worldWidth, 'hider').subscribe({
       next: (response) => {
         console.log(response);
         this.reponse.set(response);
@@ -29,14 +27,14 @@ export class Hider implements OnInit {
       }
     });
   }
-  reponse =signal<HideAndSeekResponse | null> (null);
+  reponse =signal<NewGameResponse | null> (null);
   gameState = computed(() => {
     if (!this.reponse()) return null;
     const state: GameState = [];
     let c = 0
-    for (let i = 0; i < this.reponse()!.grid.length; i++) {
+    for (let i = 0; i < (this.reponse()?.grid.length || 0); i++) {
       const row: choice[] = [];
-      for (let j = 0; j < this.reponse()!.grid[i].length; j++) {
+      for (let j = 0; j < (this.reponse()?.grid[i].length || 0); j++) {
         const payoffVal = this.reponse()!.payoff_matrix?.[i]?.[j] ?? this.reponse()!.payoff_matrix?.flat()[c] ?? 0;
         row.push({
           difficulty: this.reponse()!.grid[i][j],
@@ -62,11 +60,7 @@ export class Hider implements OnInit {
 
   choose(choice: choice) {
     console.log(`Chosen cell: (${choice.row}, ${choice.col}) with difficulty ${choice.difficulty}`);
-    // Here you can implement the logic to handle the chosen cell, e.g., send it to the backend or update the UI
-    let c = []
-    for(let i=0; i< this.worldLength * this.worldWidth; i++) {
-      c.push(i)
-    }
+    
     const selectedCell = weightedRandom(this.gameState()?.flatMap((row) => row) || [], this.reponse()!.hider_strategies)
     if (selectedCell !== undefined) {
       console.log(`Selected cell: (${selectedCell.row}, ${selectedCell.col})`);
