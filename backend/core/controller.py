@@ -66,7 +66,7 @@ def play_round(req: PlayRoundRequest) -> PlayRoundResponse:
     m = session["m"]
     human_cell = m * req.human_row + req.human_col
 
-    computer_probs = session["hider_probs"] if req.role == Role.SEEKER else session["seeker_probs"]
+    computer_probs = session["hider_probs"] if human_role == Role.SEEKER else session["seeker_probs"]
     computer_cell = computer_turn(computer_probs)
 
     if human_role == Role.SEEKER:
@@ -80,10 +80,16 @@ def play_round(req: PlayRoundRequest) -> PlayRoundResponse:
         winner = "human"
         session["human_rounds_won"] += 1
         session["human_score"] += points
+        session["computer_score"] -= points
+        human_round_score = points
+        computer_round_score = -1 * points
     else:
         winner = "computer"
         session["computer_rounds_won"] += 1
         session["computer_score"] += points
+        session["human_score"] -= points
+        human_round_score = -1 * points
+        computer_round_score = points
 
     return PlayRoundResponse(
         computer_row=computer_cell // m,
@@ -92,6 +98,8 @@ def play_round(req: PlayRoundRequest) -> PlayRoundResponse:
         points=points,
         human_score=session["human_score"],
         computer_score=session["computer_score"],
+        human_round_score=human_round_score,
+        computer_round_score=computer_round_score,
         human_rounds_won=session["human_rounds_won"],
         computer_rounds_won=session["computer_rounds_won"]
     )
@@ -117,9 +125,11 @@ def simulate(req: SimulationRequest) -> SimulationResponse:
 
         if winner == Role.HIDER:
             hider_total_score += points
+            seeker_total_score -= points
             hider_rounds_won += 1
         else:
             seeker_total_score += points
+            hider_total_score -= points
             seeker_rounds_won += 1
 
         snapshots.append(RoundSnapshot(
