@@ -15,7 +15,9 @@ export class HomePage {
   mode = signal<mode>(null);
   worldLength = signal<number>(5);
   worldWidth = signal<number>(5);
-  
+  reset = () => {
+    this.mode.set(null);
+  }
   debug = () => {
     console.log(`Mode: ${this.mode()}`);
     console.log(`World Length: ${this.worldLength()}`);

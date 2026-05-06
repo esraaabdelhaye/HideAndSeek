@@ -80,25 +80,44 @@ export class Hider implements OnInit {
   }
   handleCollision(choice: choice) {
     const difficulty = choice.difficulty;
+    let points = 0;
     if(difficulty == 1) {
-      this.accumulator.update(score => score + scores["EASY"].lose);
+      points = scores["EASY"].lose;
+      this.accumulator.update(score => score + points);
     } else if (difficulty == 2) {
-      this.accumulator.update(score => score + scores["NEUTRAL"].lose);
+      points = scores["NEUTRAL"].lose;
+      this.accumulator.update(score => score + points);
     } else if (difficulty == 3) {
-      this.accumulator.update(score => score + scores["HARD"].lose);
+      points = scores["HARD"].lose;
+      this.accumulator.update(score => score + points);
     }
+    this.roundGain.set(points);
+    this.computerScore.update(s => s + Math.abs(points));
+    this.roundsLost.update(s => s + 1);
   }
   handleMiss(choice: choice) {
     const difficulty = choice.difficulty;
+    let points = 0;
     if(difficulty == 1) {
-      this.accumulator.update(score => score + scores["EASY"].win);
+      points = scores["EASY"].win;
+      this.accumulator.update(score => score + points);
     } else if (difficulty == 2) {
-      this.accumulator.update(score => score + scores["NEUTRAL"].win);
+      points = scores["NEUTRAL"].win;
+      this.accumulator.update(score => score + points);
     } else if (difficulty == 3) {
-      this.accumulator.update(score => score + scores["HARD"].win);
+      points = scores["HARD"].win;
+      this.accumulator.update(score => score + points);
     }
+    this.roundGain.set(points);
+    this.humanScore.update(s => s + points);
+    this.roundsWon.update(s => s + 1);
   }
 
+  humanScore = signal(0);
+  computerScore = signal(0);
+  roundGain = signal(0);
+  roundsWon = signal(0);
+  roundsLost = signal(0);
   accumulator = signal(0);
   animatedCell = signal<{ row: number; col: number; type: 'collision' | 'miss' } | null>(null);
   algorithmSelectedCell = signal<{ row: number; col: number } | null>(null);

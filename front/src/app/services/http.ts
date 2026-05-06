@@ -11,7 +11,7 @@ export interface NewGameResponse {
   expected_value: number;
 }
 export type Role = 'hider' | 'seeker';
-interface PlayRoundResponse {
+export interface PlayRoundResponse {
   computer_row: number;
   computer_col: number;
   winner: "human" | "computer";

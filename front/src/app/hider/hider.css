@@ -1,3 +1,33 @@
+
+/* Score cards animation */
+.rounded-3xl:has(.text-5xl) {
+	transition: all 300ms ease;
+}
+.rounded-3xl:has(.text-5xl):hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 32px rgba(2, 6, 23, 0.4);
+}
+
+/* Round gain card special styling */
+.rounded-3xl:has(.text-4xl) {
+	animation: slideInUp 500ms ease-out;
+}
+
+@keyframes slideInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* Score number animation */
+.text-5xl {
+	transition: all 400ms ease;
+}
 :root {
 	--bg: #0f1724;
 	--panel: #0b1220;

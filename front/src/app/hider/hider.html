@@ -1,5 +1,4 @@
-<div
-	class="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
+	<div class="min-h-screen bg-linear-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-6 text-slate-100 sm:px-6 lg:px-8">
 	<div class="mx-auto flex max-w-7xl flex-col gap-6">
 		<header class="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 shadow-2xl shadow-black/30 backdrop-blur">
 			<div class="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
@@ -38,8 +37,59 @@
 			</div>
 		</header>
 
+		<section class="grid gap-6 lg:grid-cols-4">
+			<div class="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 shadow-2xl shadow-black/30 backdrop-blur">
+				<div class="text-center">
+					<div class="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-cyan-400">Your Score</div>
+					<div class="mb-2 text-5xl font-bold text-cyan-300">{{ humanScore() }}</div>
+					<p class="text-xs uppercase tracking-wide text-slate-400">Hider Player</p>
+				</div>
+			</div>
+
+			<div class="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 shadow-2xl shadow-black/30 backdrop-blur">
+				<div class="text-center">
+					<div class="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-amber-400">Computer Score</div>
+					<div class="mb-2 text-5xl font-bold text-amber-300">{{ computerScore() }}</div>
+					<p class="text-xs uppercase tracking-wide text-slate-400">AI Player</p>
+				</div>
+			</div>
+
+			<div class="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 shadow-2xl shadow-black/30 backdrop-blur">
+				<div class="text-center">
+					<div class="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-400">Rounds Won</div>
+					<div class="mb-2 text-5xl font-bold text-emerald-300">{{ roundsWon() }}</div>
+					<p class="text-xs uppercase tracking-wide text-slate-400">Successful Hides</p>
+				</div>
+			</div>
+
+			<div class="rounded-3xl border border-slate-800 bg-slate-900/90 p-6 shadow-2xl shadow-black/30 backdrop-blur">
+				<div class="text-center">
+					<div class="mb-4 text-xs font-semibold uppercase tracking-[0.35em] text-rose-400">Rounds Lost</div>
+					<div class="mb-2 text-5xl font-bold text-rose-300">{{ roundsLost() }}</div>
+					<p class="text-xs uppercase tracking-wide text-slate-400">Found by AI</p>
+				</div>
+			</div>
+		</section>
+
+		@if (roundGain() !== 0) {
+		<div
+			class="rounded-3xl border bg-slate-900/90 p-6 shadow-2xl shadow-black/30 backdrop-blur"
+			[style.border-color]="roundGain() >= 0 ? 'rgba(16, 185, 129, 0.5)' : 'rgba(244, 63, 94, 0.5)'">
+			<div class="flex items-center justify-between gap-4">
+				<div>
+					<div class="text-xs font-semibold uppercase tracking-[0.35em]" [style.color]="roundGain() >= 0 ? '#34d399' : '#fb7185'">
+						{{ roundGain() >= 0 ? 'Round Won' : 'Round Lost' }}
+					</div>
+					<p class="mt-2 text-sm text-slate-400">Points from last round</p>
+				</div>
+				<div class="text-right text-4xl font-bold" [style.color]="roundGain() >= 0 ? '#a7f3d0' : '#fda4af'">
+					{{ roundGain() > 0 ? '+' : '' }}{{ roundGain() }}
+				</div>
+			</div>
+		</div>
+		}
+
 		<style>
-		/* Collision (success) */
 		label.collision {
 		  animation: collision-pulse 700ms ease-out;
 		  box-shadow: 0 0 12px rgba(50,200,100,0.9);
@@ -47,7 +97,6 @@
 		}
 		@keyframes collision-pulse { 0% { transform: scale(1);} 40% { transform: scale(1.12);} 70% { transform: scale(0.98);} 100% { transform: scale(1);} }
 
-		/* Miss (failure) */
 		label.miss {
 		  animation: miss-shake 700ms ease-out, miss-flash 700ms linear;
 		  box-shadow: 0 0 10px rgba(220,50,50,0.6);
@@ -122,9 +171,9 @@
 					<div class="rounded-2xl border border-slate-800 bg-slate-950/70 p-4">
 						<div class="text-xs uppercase tracking-[0.25em] text-slate-500">Legend</div>
 						<ul class="mt-3 space-y-2 text-sm text-slate-300">
-							<li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-green-500"></span> Green: easy <span class="ml-2 text-cyan-300">(+20)</span></li>
+							<li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-green-500"></span> Green: easy <span class="ml-2 text-cyan-300">(+10 / -)</span></li>
 							<li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-gray-400"></span> Gray: neutral <span class="ml-2 text-cyan-300">(+15)</span></li>
-							<li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-red-500"></span> Red: hard <span class="ml-2 text-cyan-300">(+10)</span>
+							<li class="flex items-center gap-2"><span class="h-2.5 w-2.5 rounded-full bg-red-500"></span> Red: hard <span class="ml-2 text-cyan-300">(+20)</span>
 							</li>
 						</ul>
 					</div>
@@ -137,7 +186,7 @@
 
 					<button type="button"
 						class="w-full rounded-2xl border border-cyan-500/30 bg-cyan-500/10 px-4 py-3 text-sm font-semibold text-cyan-300 transition hover:bg-cyan-500/20"
-						(click)="play(); accumulator.set(0)">
+						(click)="play(); humanScore.set(0); computerScore.set(0); roundsWon.set(0); roundsLost.set(0); accumulator.set(0); roundGain.set(0)">
 						Start new game
 					</button>
 				</div>

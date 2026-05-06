@@ -1,5 +1,5 @@
 import { Component, computed, inject, Input, OnInit, signal } from '@angular/core';
-import { NewGameResponse, Http } from '../services/http';
+import { NewGameResponse, Http, PlayRoundResponse } from '../services/http';
 
 @Component({
   selector: 'app-seeker',
@@ -11,12 +11,12 @@ export class Seeker implements OnInit {
   @Input() worldLength!: number;
   @Input() worldWidth!: number;
   http = inject(Http);
-  
+
 
   ngOnInit(): void {
     this.play();
   }
-  
+
   play = () => {
     this.http.generateWorld(this.worldLength, this.worldWidth, 'seeker').subscribe({
       next: (response) => {
@@ -28,9 +28,9 @@ export class Seeker implements OnInit {
       }
     });
   }
-  
+
   response = signal<NewGameResponse | null>(null);
-  
+
   gameState = computed(() => {
     if (!this.response()) return null;
     const state: GameState = [];
@@ -51,58 +51,66 @@ export class Seeker implements OnInit {
       }
       state.push(row);
     }
-    
+
     return state;
   });
-  
+
   debug = () => {
     console.log(this.gameState());
     console.log(this.response());
   }
 
   choose(choice: choice) {
-    console.log(`Chosen cell: (${choice.row}, ${choice.col}) with difficulty ${choice.difficulty}`);
-    const selectedCell = weightedRandom(this.gameState()?.flatMap((row) => row) || [], this.response()!.hider_strategies)
-    if (selectedCell !== undefined) {
-      console.log(`Selected cell (hider location): (${selectedCell.row}, ${selectedCell.col})`);
-      this.algorithmSelectedCell.set({ row: selectedCell.row, col: selectedCell.col });
-      const isSame = selectedCell.row === choice.row && selectedCell.col === choice.col;
-      if (isSame) {
-        console.log("Chosen cell was where hider is!");
-        this.animatedCell.set({ row: choice.row, col: choice.col, type: 'collision' });
-        this.handleCollision(choice);
-      } else {
-        console.log("Chosen cell was NOT where hider is.");
-        this.animatedCell.set({ row: choice.row, col: choice.col, type: 'miss' });
-        this.handleMiss(choice);
+    this.http.playRound(choice.col, choice.row, this.response()!.session_id).subscribe({
+      next: (response) => {
+        console.log('Round result:', response);
+        // Here you can implement logic to update the UI based on the round result
+        console.log(`Chosen cell: (${choice.row}, ${choice.col}) with difficulty ${choice.difficulty}`);
+        const selectedCell = this.gameState()?.flatMap((row) => row).find(c => c.row === response.computer_row && c.col === response.computer_col);
+        if (selectedCell !== undefined) {
+          console.log(`Selected cell (hider location): (${selectedCell.row}, ${selectedCell.col})`);
+          this.algorithmSelectedCell.set({ row: selectedCell.row, col: selectedCell.col });
+          
+          if (response.winner === 'computer') {
+            console.log("Chosen cell was where hider is!");
+            this.animatedCell.set({ row: choice.row, col: choice.col, type: 'collision' });
+            this.handleCollision(response );
+          } else {
+            console.log("Chosen cell was NOT where hider is.");
+            this.animatedCell.set({ row: choice.row, col: choice.col, type: 'miss' });
+            this.handleMiss(response);
+          }
+          setTimeout(() => this.animatedCell.set(null), 700);
+        }
+      },
+      error: (error) => {
+        console.error('Error playing round:', error);
       }
-      setTimeout(() => this.animatedCell.set(null), 700);
-    }
-  }
-  
-  handleCollision(choice: choice) {
-    const difficulty = choice.difficulty;
-    if(difficulty == 3) {
-      this.accumulator.update(score => score + scores["EASY"].win);
-    } else if (difficulty == 2) {
-      this.accumulator.update(score => score + scores["NEUTRAL"].win);
-    } else if (difficulty == 1) {
-      this.accumulator.update(score => score + scores["HARD"].win);
-    }
-  }
-  
-  handleMiss(choice: choice) {
-    const difficulty = choice.difficulty;
-    if(difficulty == 3) {
-      this.accumulator.update(score => score + scores["EASY"].lose);
-    } else if (difficulty == 2) {
-      this.accumulator.update(score => score + scores["NEUTRAL"].lose);
-    } else if (difficulty == 1) {
-      this.accumulator.update(score => score + scores["HARD"].lose);
-    }
+    });
+
   }
 
-  accumulator = signal(0);
+  handleCollision(res: PlayRoundResponse) {
+    this.humanScore.set(res.human_score);
+    this.computerScore.set(res.computer_score);
+    this.roundGain.set(res.points);
+    this.roundsWon.set(res.human_rounds_won);
+    this.roundsLost.set(res.computer_rounds_won);
+  }
+
+  handleMiss(res: PlayRoundResponse) {
+    this.humanScore.set(res.human_score);
+    this.computerScore.set(res.computer_score);
+    this.roundGain.set(res.points);
+    this.roundsWon.set(res.human_rounds_won);
+    this.roundsLost.set(res.computer_rounds_won);
+  }
+
+  humanScore = signal(0);
+  computerScore = signal(0);
+  roundGain = signal(0);
+  roundsWon = signal(0);
+  roundsLost = signal(0);
   animatedCell = signal<{ row: number; col: number; type: 'collision' | 'miss' } | null>(null);
   algorithmSelectedCell = signal<{ row: number; col: number } | null>(null);
 }
@@ -122,7 +130,7 @@ type GameState = choice[][]
 function weightedRandom(items: choice[], weights: number[]): any {
   const totalWeight = weights.reduce((sum, w) => sum + w, 0);
   const randomNum = Math.random() * totalWeight;
-  
+
   let currentWeight = 0;
   for (let i = 0; i < weights.length; i++) {
     currentWeight += weights[i];
@@ -130,12 +138,12 @@ function weightedRandom(items: choice[], weights: number[]): any {
       return items[i];
     }
   }
-  
+
   return items[items.length - 1];
 }
 
 const scores: Record<string, { win: number; lose: number }> = {
-    "EASY":    {"win": 15, "lose": -10},
-    "NEUTRAL": {"win": 10, "lose": -15},
-    "HARD":    {"win": 5, "lose": -20}
+  "EASY": { "win": 15, "lose": -10 },
+  "NEUTRAL": { "win": 10, "lose": -15 },
+  "HARD": { "win": 5, "lose": -20 }
 }

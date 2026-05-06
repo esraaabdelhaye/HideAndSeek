@@ -66,7 +66,7 @@ def play_round(req: PlayRoundRequest) -> PlayRoundResponse:
     m = session["m"]
     human_cell = m * req.human_row + req.human_col
 
-    computer_probs = session["hider_probs"] if req.role == Role.SEEKER else session["seeker_probs"]
+    computer_probs = session["hider_probs"] if human_role == Role.SEEKER else session["seeker_probs"]
     computer_cell = computer_turn(computer_probs)
 
     if human_role == Role.SEEKER:
