@@ -3,7 +3,8 @@ import uuid
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from models.dtos import NewGameRequest, NewGameResponse, Role, PlayRoundRequest, PlayRoundResponse
+from models.dtos import NewGameRequest, NewGameResponse, Role, PlayRoundRequest, PlayRoundResponse, SimulationResponse, \
+    SimulationRequest, RoundSnapshot
 from .engine import initialize_game, computer_turn, run_round
 
 app = FastAPI()
@@ -72,24 +73,70 @@ def play_round(req: PlayRoundRequest):
     else:
         hider_cell, seeker_cell = human_cell, computer_cell
 
-    result = run_round(hider_cell, seeker_cell, session["payoff_matrix"])
+    winner_role, points = run_round(hider_cell, seeker_cell, session["payoff_matrix"])
 
-    if human_role == result["winner"]:
+    if human_role == winner_role:
         winner = "human"
         session["human_rounds_won"] += 1
-        session["human_score"] += result["points"]
+        session["human_score"] += points
     else:
         winner = "computer"
         session["computer_rounds_won"] += 1
-        session["computer_score"] += result["points"]
+        session["computer_score"] += points
 
     return PlayRoundResponse(
         computer_row=computer_cell // m,
         computer_col=computer_cell % m,
         winner=winner,
-        points=result["points"],
+        points=points,
         human_score=session["human_score"],
         computer_score=session["computer_score"],
         human_rounds_won=session["human_rounds_won"],
         computer_rounds_won=session["computer_rounds_won"]
     )
+
+@app.post("/simulate")
+def simulate(req: SimulationRequest):
+    session = sessions[req.session_id]
+    m = session["m"]
+    payoff_matrix = session["payoff_matrix"]
+    hider_probs = session["hider_probs"]
+    seeker_probs = session["seeker_probs"]
+
+    hider_total_score = 0
+    seeker_total_score = 0
+    hider_rounds_won = 0
+    seeker_rounds_won = 0
+    snapshots = []
+
+    for i in range(100):
+        hider_cell = computer_turn(hider_probs)
+        seeker_cell = computer_turn(seeker_probs)
+        winner, points = run_round(hider_cell, seeker_cell, payoff_matrix)
+
+        if winner == Role.HIDER:
+            hider_total_score += points
+            hider_rounds_won += 1
+        else:
+            seeker_total_score += points
+            seeker_rounds_won += 1
+
+        snapshots.append(RoundSnapshot(
+            round=i,
+            hider_row=hider_cell // m,
+            hider_col=hider_cell % m,
+            seeker_row=seeker_cell // m,
+            seeker_col=seeker_cell % m,
+            winner=winner,
+            points=points
+        ))
+
+    return SimulationResponse(
+        hider_rounds_won=hider_rounds_won,
+        seeker_rounds_won=seeker_rounds_won,
+        hider_score=hider_total_score,
+        seeker_score=seeker_total_score,
+        snapshots=snapshots
+    )
+
+

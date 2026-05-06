@@ -25,12 +25,6 @@ def computer_turn(probs):
 def run_round(hider_cell, seeker_cell, payoff_matrix):
     points = payoff_matrix[hider_cell][seeker_cell]
     if points > 0:
-        return {
-            "winner": Role.HIDER,
-            "points": points
-        }
+        return Role.HIDER, points
     else:
-        return {
-            "winner": Role.SEEKER,
-            "points": abs(points)
-        }
+        return Role.SEEKER, abs(points)

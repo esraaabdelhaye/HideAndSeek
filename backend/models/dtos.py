@@ -31,3 +31,22 @@ class PlayRoundResponse(BaseModel):
     computer_score: float
     human_rounds_won: int
     computer_rounds_won: int
+
+class SimulationRequest(BaseModel):
+    session_id: str
+
+class RoundSnapshot(BaseModel):
+    round: int
+    hider_row: int
+    hider_col: int
+    seeker_row: int
+    seeker_col: int
+    winner: Role
+    points: float
+
+class SimulationResponse(BaseModel):
+    hider_rounds_won: int
+    seeker_rounds_won: int
+    hider_score: float
+    seeker_score: float
+    snapshots: list[RoundSnapshot]
