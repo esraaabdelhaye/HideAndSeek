@@ -35,7 +35,7 @@ app.add_middleware(
 sessions = {}
 
 @app.post("/new-game")
-def new_game(req: NewGameRequest):
+def new_game(req: NewGameRequest) -> NewGameResponse:
     session_id = str(uuid.uuid4())
     game = initialize_game(req.n, req.m)
     sessions[session_id] = {
@@ -53,12 +53,13 @@ def new_game(req: NewGameRequest):
         session_id=session_id,
         grid=game["grid"],
         payoff_matrix=game["payoff_matrix"],
-        computer_probs=game["hider_strategies"] if req.role == Role.SEEKER else game["seeker_strategies"],
+        hider_strategies=game["hider_strategies"],
+        seeker_strategies=game["seeker_strategies"],
         expected_value=game["expected_value"]
     )
 
 @app.post("/play-round")
-def play_round(req: PlayRoundRequest):
+def play_round(req: PlayRoundRequest) -> PlayRoundResponse:
     session = sessions[req.session_id]
 
     human_role = session["role"]
@@ -96,7 +97,7 @@ def play_round(req: PlayRoundRequest):
     )
 
 @app.post("/simulate")
-def simulate(req: SimulationRequest):
+def simulate(req: SimulationRequest) -> SimulationResponse:
     session = sessions[req.session_id]
     m = session["m"]
     payoff_matrix = session["payoff_matrix"]

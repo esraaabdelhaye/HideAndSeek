@@ -14,7 +14,8 @@ class NewGameResponse(BaseModel):
     session_id: str
     grid: list[list[int]]
     payoff_matrix: list[list[float]]
-    computer_probs: list[float]
+    hider_strategies: list[float]
+    seeker_strategies: list[float]
     expected_value: float
 
 class PlayRoundRequest(BaseModel):
