@@ -11,7 +11,7 @@ export class Hider implements OnInit {
   @Input() worldLength!: number;
   @Input() worldWidth!: number;
   http = inject(Http);
-
+  // showPayoffMatrix = signal(false);
 
   ngOnInit(): void {
     this.play();
@@ -111,6 +111,7 @@ export class Hider implements OnInit {
   accumulator = signal(0);
   animatedCell = signal<{ row: number; col: number; type: 'collision' | 'miss' } | null>(null);
   algorithmSelectedCell = signal<{ row: number; col: number } | null>(null);
+  showPayoffMatrix = signal(false);
 }
 
 /* 

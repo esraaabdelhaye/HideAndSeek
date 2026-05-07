@@ -113,6 +113,7 @@ export class Seeker implements OnInit {
   roundsLost = signal(0);
   animatedCell = signal<{ row: number; col: number; type: 'collision' | 'miss' } | null>(null);
   algorithmSelectedCell = signal<{ row: number; col: number } | null>(null);
+    showPayoffMatrix = signal(false);
 }
 
 export interface choice {

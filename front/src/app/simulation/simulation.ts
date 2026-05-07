@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, Input, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
-import { Http, SimulationResponse, RoundSnapshot } from '../services/http';
+import { Http, SimulationResponse, RoundSnapshot, NewGameResponse } from '../services/http';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -20,6 +20,8 @@ export class Simulation implements OnInit {
 
   running = signal(false);
   roundLog = signal<RoundSnapshot[]>([]);
+    showPayoffMatrix = signal(false);
+  gameResponse = signal<NewGameResponse | null>(null);
   gameValue = signal<number | null>(null);
 
   results = signal({
@@ -66,6 +68,7 @@ export class Simulation implements OnInit {
       );
 
       this.gameValue.set(game.expected_value);
+      this.gameResponse.set(game);
 
       const sim: SimulationResponse = await lastValueFrom(this.http.simulate(game.session_id));
 
