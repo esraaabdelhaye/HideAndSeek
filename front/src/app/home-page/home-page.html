@@ -120,6 +120,6 @@
   } @else if (mode() == 'seeker') {
     <app-seeker [worldLength]="worldLength()" [worldWidth]="worldWidth()"></app-seeker>
   } @else {
-    <app-simulation></app-simulation>
+    <app-simulation [worldLength]="worldLength()" [worldWidth]="worldWidth()"></app-simulation>
   }
 </div>

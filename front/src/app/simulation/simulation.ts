@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, Input, OnInit } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Http, SimulationResponse, RoundSnapshot } from '../services/http';
 import { lastValueFrom } from 'rxjs';
@@ -9,11 +9,14 @@ import { lastValueFrom } from 'rxjs';
   styleUrl: './simulation.css',
   imports: [DecimalPipe],
 })
-export class Simulation {
+export class Simulation implements OnInit {
   http = inject(Http);
 
-  worldLength = signal(3);
-  worldWidth = signal(3);
+  @Input() worldLength!: number;
+  @Input() worldWidth!: number;
+
+  worldLengthSignal = signal(3);
+  worldWidthSignal = signal(3);
 
   running = signal(false);
   roundLog = signal<RoundSnapshot[]>([]);
@@ -38,6 +41,11 @@ export class Simulation {
     };
   });
 
+  ngOnInit() {
+    this.worldLengthSignal.set(this.worldLength);
+    this.worldWidthSignal.set(this.worldWidth);
+  }
+
   async simulate() {
     if (this.running()) return;
     this.running.set(true);
@@ -54,7 +62,7 @@ export class Simulation {
 
     try {
       const game = await lastValueFrom(
-        this.http.generateWorld(this.worldLength(), this.worldWidth(), 'hider'),
+        this.http.generateWorld(this.worldLengthSignal(), this.worldWidthSignal(), 'hider'),
       );
 
       this.gameValue.set(game.expected_value);

@@ -36,9 +36,9 @@
           <span>World length</span>
           <input
             type="number"
-            [value]="worldLength()"
+            [value]="worldLengthSignal()"
             (input)="
-              worldLength.set($any($event.target).valueAsNumber || +$any($event.target).value)
+              worldLengthSignal.set($any($event.target).valueAsNumber || +$any($event.target).value)
             "
             min="1"
           />
@@ -48,9 +48,9 @@
           <span>World width</span>
           <input
             type="number"
-            [value]="worldWidth()"
+            [value]="worldWidthSignal()"
             (input)="
-              worldWidth.set($any($event.target).valueAsNumber || +$any($event.target).value)
+              worldWidthSignal.set($any($event.target).valueAsNumber || +$any($event.target).value)
             "
             min="1"
           />
