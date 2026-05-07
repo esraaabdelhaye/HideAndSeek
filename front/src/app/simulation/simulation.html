@@ -1,77 +1,143 @@
 <div class="simulation-shell">
-	<header class="hero-card">
-		<div>
-			<p class="eyebrow">Simulation Mode</p>
-			<h1>Run 100 rounds and compare outcomes</h1>
-			<p class="hero-copy">Generate worlds repeatedly, simulate both players, and inspect the result distribution in one place.</p>
-		</div>
-	</header>
+  <header class="hero-card">
+    <div>
+      <p class="eyebrow">Simulation Mode</p>
+      <h1>100-round automated simulation</h1>
+      <p class="hero-copy">
+        Both players use their optimal mixed strategies. Watch the round-by-round results unfold
+        live.
+      </p>
+    </div>
 
-	<main class="simulation-grid">
-		<section class="panel-card controls-card">
-			<div class="panel-header">
-				<div>
-					<p class="panel-kicker">Controls</p>
-					<h2>Simulation settings</h2>
-				</div>
-				<button class="run-button" type="button" (click)="simulate()" [disabled]="running()">
-					{{ running() ? 'Running...' : 'Run simulation' }}
-				</button>
-			</div>
+    <div class="hero-right">
+      @if (gameValue() !== null) {
+        <div class="game-value-pill">
+          <span class="gv-label">Game Value (V*)</span>
+          <span class="gv-number">{{ gameValue() | number: '1.4-4' }}</span>
+        </div>
+      }
+      <button class="run-button" type="button" (click)="simulate()" [disabled]="running()">
+        {{ running() ? 'Running...' : 'Run simulation' }}
+      </button>
+    </div>
+  </header>
 
-			<div class="control-grid">
-				<label class="control-field">
-					<span>World length</span>
-					<input type="number" class=" text-2xl" [value]="worldLength()" (input)="worldLength.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" max="10" />
-				</label>
+  <main class="simulation-grid">
+    <section class="panel-card controls-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-kicker">Controls</p>
+          <h2>Grid settings</h2>
+        </div>
+      </div>
 
-				<label class="control-field">
-					<span>World width</span>
-					<input type="number" class=" text-2xl" [value]="worldWidth()" (input)="worldWidth.set($any($event.target).valueAsNumber || +$any($event.target).value)" min="1" max="10" />
-				</label>
-			</div>
-		</section>
+      <div class="control-grid">
+        <label class="control-field">
+          <span>World length</span>
+          <input
+            type="number"
+            [value]="worldLength()"
+            (input)="
+              worldLength.set($any($event.target).valueAsNumber || +$any($event.target).value)
+            "
+            min="1"
+          />
+        </label>
 
-		<section class="panel-card results-card">
-			<div class="panel-header">
-				<div>
-					<p class="panel-kicker">Outcome</p>
-					<h2>Round summary</h2>
-				</div>
-				<span class="status-chip">{{ summary().total }} simulated decisions</span>
-			</div>
+        <label class="control-field">
+          <span>World width</span>
+          <input
+            type="number"
+            [value]="worldWidth()"
+            (input)="
+              worldWidth.set($any($event.target).valueAsNumber || +$any($event.target).value)
+            "
+            min="1"
+          />
+        </label>
+      </div>
+    </section>
 
-			<div class="metrics-grid">
-				<div class="metric-box metric-cyan">
-					<span>Hider wins</span>
-					<strong>{{ results().hiderWins }}</strong>
-				</div>
-				<div class="metric-box metric-purple">
-					<span>Seeker wins</span>
-					<strong>{{ results().seekerWins }}</strong>
-				</div>
-			</div>
+    <section class="panel-card results-card">
+      <div class="panel-header">
+        <div>
+          <p class="panel-kicker">Outcome</p>
+          <h2>Round summary</h2>
+        </div>
+        <span class="status-chip">{{ summary().total }} / 100 rounds</span>
+      </div>
 
-			<div class="metrics-grid" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
-				<div class="metric-box metric-cyan">
-					<span>Hider total score</span>
-					<strong>{{ results().hiderScore }}</strong>
-				</div>
-				<div class="metric-box metric-purple">
-					<span>Seeker total score</span>
-					<strong>{{ results().seekerScore }}</strong>
-				</div>
-			</div>
+      <div class="metrics-grid">
+        <div class="metric-box metric-cyan">
+          <span>Hider wins</span>
+          <strong>{{ results().hiderWins }}</strong>
+          <small>Score: {{ results().hiderScore | number: '1.2-2' }}</small>
+        </div>
+        <div class="metric-box metric-purple">
+          <span>Seeker wins</span>
+          <strong>{{ results().seekerWins }}</strong>
+          <small>Score: {{ results().seekerScore | number: '1.2-2' }}</small>
+        </div>
+      </div>
+    </section>
 
-			<div class="json-card">
-				<div class="json-header">
-					<span>Results payload</span>
-					<code>results()</code>
-				</div>
-				<pre class="results-pre" [innerText]="resultsText()"></pre>
-			</div>
-		</section>
+    <section class="panel-card steps-card full-width">
+      <div class="panel-header">
+        <div>
+          <p class="panel-kicker">Live Feed</p>
+          <h2>Round-by-round steps</h2>
+        </div>
+        <span class="status-chip">
+          @if (running()) {
+            ⏳ Simulating…
+          } @else if (roundLog().length > 0) {
+            ✅ Complete
+          } @else {
+            Waiting
+          }
+        </span>
+      </div>
 
-	
-	</main>
+      <div class="steps-header">
+        <span class="col-round">#</span>
+        <span class="col-hider">🙈 Hider cell</span>
+        <span class="col-seeker">👹 Seeker cell</span>
+        <span class="col-result">Result</span>
+        <span class="col-points">Points</span>
+      </div>
+
+      <div class="steps-list">
+        @if (roundLog().length === 0 && !running()) {
+          <div class="steps-empty">
+            Press <strong>Run simulation</strong> to start — rounds will appear here once complete.
+          </div>
+        }
+        @for (snap of roundLog(); track snap.round) {
+          <div
+            class="step-row"
+            [class.step-hider]="snap.winner === 'hider'"
+            [class.step-seeker]="snap.winner === 'seeker'"
+          >
+            <span class="col-round step-num">{{ snap.round + 1 }}</span>
+            <span class="col-hider step-cell">({{ snap.hider_row }}, {{ snap.hider_col }})</span>
+            <span class="col-seeker step-cell">({{ snap.seeker_row }}, {{ snap.seeker_col }})</span>
+            <span class="col-result">
+              @if (snap.winner === 'hider') {
+                <span class="badge badge-hider">Hider escapes</span>
+              } @else {
+                <span class="badge badge-seeker">Seeker finds!</span>
+              }
+            </span>
+            <span
+              class="col-points step-pts"
+              [class.pts-hider]="snap.winner === 'hider'"
+              [class.pts-seeker]="snap.winner === 'seeker'"
+            >
+              +{{ snap.points | number: '1.2-2' }}
+            </span>
+          </div>
+        }
+      </div>
+    </section>
+  </main>
 </div>
