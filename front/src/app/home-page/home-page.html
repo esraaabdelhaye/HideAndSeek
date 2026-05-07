@@ -1,50 +1,104 @@
-<div class="bg-slate-300 h-screen flex flex-col">
-    @if (!mode()) {
+<div class="hp-root">
+  <!-- Animated background grid -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <!-- Floating orbs -->
+  <div class="orb orb-1" aria-hidden="true"></div>
+  <div class="orb orb-2" aria-hidden="true"></div>
 
-    <div class="flex p-[10%] pt-[6%]  gap-4">
-        <div class="flex flex-1">
-            <button (click)="mode.set('simulation')"
-                class="h-full w-full cursor-pointer rounded-[10px] bg-blue-600 px-4 py-4 text-base font-semibold text-white transition duration-150 ease-in-out hover:-translate-y-px hover:opacity-95"
-                type="button">
-                Simulation Mode
-            </button>
+  @if (!mode()) {
+    <div class="hp-shell">
+      <!-- Hero -->
+      <header class="hp-hero">
+        <div class="hp-eyebrow"><span class="dot"></span> Game Theory Engine</div>
+        <h1 class="hp-title">
+          <span class="title-line">HIDE</span>
+          <span class="title-amp">&amp;</span>
+          <span class="title-line">SEEK</span>
+        </h1>
+        <p class="hp-subtitle">
+          A zero-sum game solved with linear programming.<br />
+          Choose your role — or watch the algorithm play itself.
+        </p>
+      </header>
+
+      <!-- Grid config -->
+      <div class="config-bar">
+        <div class="config-label">Grid dimensions</div>
+        <div class="config-inputs">
+          <label class="config-field">
+            <span>Rows</span>
+            <input
+              type="number"
+              [value]="worldLength()"
+              (change)="worldLength.set($event.target.valueAsNumber)"
+              min="1"
+              max="9"
+            />
+          </label>
+          <div class="config-sep">×</div>
+          <label class="config-field">
+            <span>Cols</span>
+            <input
+              type="number"
+              [value]="worldWidth()"
+              (change)="worldWidth.set($event.target.valueAsNumber)"
+              min="1"
+              max="9"
+            />
+          </label>
         </div>
-        <div class="flex flex-1 flex-col gap-3">
-            <button (click)="mode.set('hider')"
-                class="flex-1 w-full cursor-pointer rounded-[10px] bg-emerald-600 px-4 py-4 text-base font-semibold text-white transition duration-150 ease-in-out hover:-translate-y-px hover:opacity-95"
-                type="button">
-                Play as Hider
-            </button>
-            <button (click)="mode.set('seeker')"
-                class="flex-1 w-full cursor-pointer rounded-[10px] bg-red-600 px-4 py-4 text-base font-semibold text-white transition duration-150 ease-in-out hover:-translate-y-px hover:opacity-95"
-                type="button">
-                Play as Seeker
-            </button>
-        </div>
-    </div>
-    <div class="mx-auto bg-white rounded-[10px] p-6 font-semibold w-[50%] flex flex-col items-center justify-center gap-6">
+      </div>
 
+      <!-- Mode cards -->
+      <div class="mode-grid">
+        <button class="mode-card card-sim" (click)="mode.set('simulation')" type="button">
+          <div class="card-glow card-glow-sim"></div>
+          <div class="card-icon">⚡</div>
+          <div class="card-body">
+            <div class="card-tag">AUTO</div>
+            <div class="card-title">Simulation</div>
+            <div class="card-desc">
+              Watch 100 rounds of optimal play. Both sides follow their Nash equilibrium strategy.
+            </div>
+          </div>
+          <div class="card-arrow">→</div>
+        </button>
 
-            <div class="flex flex-row items-center gap-3 w-fit">
-                <p class="text-gray-600 text-sm">World length:</p>
-                <input
-                 type="number" placeholder="Enter world length" class="w-fit bg-sky-300 rounded-[10px] px-4 py-2 text-base font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500" 
-                 (change)="worldLength.set($event.target.valueAsNumber)" [value]="worldLength()"
-                />
+        <button class="mode-card card-hider" (click)="mode.set('hider')" type="button">
+          <div class="card-glow card-glow-hider"></div>
+          <div class="card-icon">🙈</div>
+          <div class="card-body">
+            <div class="card-tag">PLAYER</div>
+            <div class="card-title">Play as Hider</div>
+            <div class="card-desc">
+              Choose where to hide. The algorithm hunts using its optimal mixed strategy.
             </div>
-            <div class="flex flex-row items-center gap-3 w-fit">
-                <p class="text-gray-600 text-sm">World width:</p>
-                <input type="number" placeholder="Enter world width" class="w-fit bg-sky-300 rounded-[10px] px-4 py-2 text-base font-semibold text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500" 
-                (change)="worldWidth.set($event.target.valueAsNumber)" [value]="worldWidth()"
-                />
+          </div>
+          <div class="card-arrow">→</div>
+        </button>
+
+        <button class="mode-card card-seeker" (click)="mode.set('seeker')" type="button">
+          <div class="card-glow card-glow-seeker"></div>
+          <div class="card-icon">👹</div>
+          <div class="card-body">
+            <div class="card-tag">PLAYER</div>
+            <div class="card-title">Play as Seeker</div>
+            <div class="card-desc">
+              Track down the hider. The algorithm hides using its optimal mixed strategy.
             </div>
-        
+          </div>
+          <div class="card-arrow">→</div>
+        </button>
+      </div>
+
+      <!-- Footer note -->
+      <div class="hp-footer">Payoffs computed via SciPy · HiGHS LP solver · FastAPI backend</div>
     </div>
-    }@else if (mode() == 'hider') {
-        <app-hider [worldLength]="worldLength()" [worldWidth]="worldWidth()"></app-hider>
-    }@else if (mode() == 'seeker') {
-        <app-seeker [worldLength]="worldLength()" [worldWidth]="worldWidth()" ></app-seeker>
-    }@else {
-        <app-simulation ></app-simulation>
-    }
+  } @else if (mode() == 'hider') {
+    <app-hider [worldLength]="worldLength()" [worldWidth]="worldWidth()"></app-hider>
+  } @else if (mode() == 'seeker') {
+    <app-seeker [worldLength]="worldLength()" [worldWidth]="worldWidth()"></app-seeker>
+  } @else {
+    <app-simulation></app-simulation>
+  }
 </div>
