@@ -1,13 +1,37 @@
 <div class="hp-root">
   <!-- Animated background grid -->
   <div class="bg-grid" aria-hidden="true"></div>
-  <!-- Floating orbs -->
   <div class="orb orb-1" aria-hidden="true"></div>
   <div class="orb orb-2" aria-hidden="true"></div>
 
+  <!-- Global navbar — only visible when inside a mode -->
+  @if (mode()) {
+    <nav class="global-nav">
+      <button class="nav-back" (click)="mode.set(null)" type="button">
+        <span class="nav-back-arrow">←</span>
+        <span>Back to menu</span>
+      </button>
+
+      <div class="nav-breadcrumb">
+        <span class="nav-brand">HIDE &amp; SEEK</span>
+        <span class="nav-sep">/</span>
+        <span class="nav-mode">
+          @if (mode() === 'simulation') {
+            Simulation
+          } @else if (mode() === 'hider') {
+            Playing as Hider
+          } @else if (mode() === 'seeker') {
+            Playing as Seeker
+          }
+        </span>
+      </div>
+
+      <div class="nav-dims">{{ worldLength() }} × {{ worldWidth() }} grid</div>
+    </nav>
+  }
+
   @if (!mode()) {
     <div class="hp-shell">
-      <!-- Hero -->
       <header class="hp-hero">
         <div class="hp-eyebrow"><span class="dot"></span> Game Theory Engine</div>
         <h1 class="hp-title">
@@ -21,7 +45,6 @@
         </p>
       </header>
 
-      <!-- Grid config -->
       <div class="config-bar">
         <div class="config-label">Grid dimensions</div>
         <div class="config-inputs">
@@ -30,7 +53,7 @@
             <input
               type="number"
               [value]="worldLength()"
-              (change)="worldLength.set($event.target.valueAsNumber)"
+              (change)="worldLength.set($any($event.target).valueAsNumber)"
               min="1"
               max="9"
             />
@@ -41,7 +64,7 @@
             <input
               type="number"
               [value]="worldWidth()"
-              (change)="worldWidth.set($event.target.valueAsNumber)"
+              (change)="worldWidth.set($any($event.target).valueAsNumber)"
               min="1"
               max="9"
             />
@@ -49,7 +72,6 @@
         </div>
       </div>
 
-      <!-- Mode cards -->
       <div class="mode-grid">
         <button class="mode-card card-sim" (click)="mode.set('simulation')" type="button">
           <div class="card-glow card-glow-sim"></div>
@@ -91,7 +113,6 @@
         </button>
       </div>
 
-      <!-- Footer note -->
       <div class="hp-footer">Payoffs computed via SciPy · HiGHS LP solver · FastAPI backend</div>
     </div>
   } @else if (mode() == 'hider') {
