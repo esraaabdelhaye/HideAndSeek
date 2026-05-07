@@ -206,6 +206,6 @@ Runs 100 fully automated rounds using the optimal strategies for both players.
 | Layer | Technology |
 |-------|-----------|
 | Backend | Python, FastAPI, SciPy (HiGHS), NumPy |
-| Frontend | Angular 18+, TypeScript, Tailwind CSS |
+| Frontend | Angular 18+, TypeScript|
 | LP Solver | HiGHS via `scipy.optimize.linprog` |
 | Sessions | In-memory dict keyed by UUID |
